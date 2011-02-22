@@ -9,6 +9,9 @@ Gem::Specification.new do |s|
   s.files        = Dir.glob('{app,lib,config}/**/*') + %w(MIT-LICENSE)
   s.require_path = 'lib'
 
+  s.add_dependency 'devise'
+  s.add_dependency 'devise_openid_authenticatable'
+
   s.summary     = 'A simple, customised OpenID client based on devise.'
   s.description = %q{
     A Rails engine implementing a simple OpenID client with some
