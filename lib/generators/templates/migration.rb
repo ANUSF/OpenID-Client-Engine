@@ -1,7 +1,7 @@
-class DeviseCreateUsers < ActiveRecord::Migration
+class CreateOpenidUsersTable < ActiveRecord::Migration
   def self.up
     create_table :openid_users do |t|
-      t.openid_authenticatable
+      t.string :identity_url
       t.string :name
       t.string :email
     end
