@@ -1,9 +1,8 @@
-class OpenidClient::User < ActiveRecord::Base
-  table_name :openid_users
+class OpenidUser < ActiveRecord::Base
   devise :openid_authenticatable
 
   def self.create_from_identity_url(identity_url)
-    OpenidClient::User.create(:identity_url => identity_url)
+    OpenidUser.create(:identity_url => identity_url)
   end
 
   def self.openid_optional_fields
