@@ -14,5 +14,8 @@ module OpenidClient
   end
 
   class Engine < Rails::Engine
+    initializer "openid_client.add_middleware" do |app|
+      app.middleware.insert_before(Warden::Manager, Rack::OpenID)
+    end
   end
 end
