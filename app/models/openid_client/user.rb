@@ -1,0 +1,30 @@
+class OpenidClient::User < ActiveRecord::Base
+  table_name :openid_users
+  devise :openid_authenticatable
+
+  def self.create_from_identity_url(identity_url)
+    OpenidClient::User.create(:identity_url => identity_url)
+  end
+
+  def self.openid_optional_fields
+    ["email", "fullname"]
+  end
+
+  def openid_fields=(fields)
+    fields.each do |key, value|
+      # Some AX providers can return multiple values per key
+      if value.is_a? Array
+        value = value.first
+      end
+
+      case key.to_s
+      when "fullname"
+        self.name = value
+      when "email"
+        self.email = value
+      else
+        logger.error "Unknown OpenID field: #{key}"
+      end
+    end
+  end
+end
