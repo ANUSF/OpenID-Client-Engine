@@ -1,4 +1,4 @@
-class OpenidClient::SessionsController < Devise::SessionsController
+class OpenidSessionsController < Devise::SessionsController
   SERVER = 'http://openid.assda.edu.au/joid'
 
   def create
