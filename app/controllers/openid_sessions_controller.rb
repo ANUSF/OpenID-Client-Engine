@@ -21,10 +21,11 @@ class OpenidSessionsController < Devise::SessionsController
   end
 
   def destroy
-    id_url = current_user.identity_url if signed_in?(resource_name)
+    if signed_in?(resource_name)
+      id_url = warden.authenticate(:scope => resource_name)
+      set_flash_message :notice, :signed_out
+    end
 
-    # -- sign out via devise without redirecting
-    set_flash_message :notice, :signed_out if signed_in?(resource_name)
     sign_out(resource_name)
 
     if bypass_openid or params[:on_server].blank?
