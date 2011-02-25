@@ -1,4 +1,4 @@
-class OpenidSessionsController < Devise::SessionsController
+class <%= controller_name.camelize %>Controller < Devise::SessionsController
   SERVER = 'http://openid.assda.edu.au/joid'
 
   def create

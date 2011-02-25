@@ -2,6 +2,27 @@ A Rails engine implementing a simple OpenID client with some
 customisation. All the heavy lifting is done by devise, ruby-openid
 and rack-openid.
 
+Step by step:
+
+1) Create a new rails application:
+
+    rails new oid-test -J -T
+
+2) Add these lines to Gemfile:
+
+    gem 'mongrel', '~> 1.2.0.pre2'
+    gem 'devise'
+    gem 'devise_openid_authenticatable'
+    gem 'openid_client', :path => '/home/olaf/Ruby-Rails/my-gems/openid_client'
+
+Remark: Instead of mongrel, any server that can handle long URLs is fine.
+
+3) Bundle:
+
+    bundle
+
+4)
+
 
 Author: Olaf Delgado-Friedrichs (odf@github.com)
 

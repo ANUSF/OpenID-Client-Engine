@@ -1,8 +1,8 @@
-class OpenidUser < ActiveRecord::Base
+class <%= class_name %> < ActiveRecord::Base
   devise :openid_authenticatable
 
   def self.create_from_identity_url(identity_url)
-    OpenidUser.create(:identity_url => identity_url)
+    <%= class_name %>.create(:identity_url => identity_url)
   end
 
   def self.openid_optional_fields

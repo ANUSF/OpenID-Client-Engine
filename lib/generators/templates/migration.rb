@@ -1,15 +1,15 @@
-class CreateOpenidUsersTable < ActiveRecord::Migration
+class Create<%= class_name %>Table < ActiveRecord::Migration
   def self.up
-    create_table :openid_users do |t|
+    create_table :<%= table_name %> do |t|
       t.string :identity_url
       t.string :name
       t.string :email
     end
 
-    add_index :openid_users, :identity_url, :unique => true
+    add_index :<%= table_name %>, :identity_url, :unique => true
   end
 
   def self.down
-    drop_table :openid_users
+    drop_table :<%= table_name %>
   end
 end
