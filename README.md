@@ -13,7 +13,7 @@ Step by step:
     gem 'mongrel', '~> 1.2.0.pre2'
     gem 'devise'
     gem 'devise_openid_authenticatable'
-    gem 'openid_client', :path => '/home/olaf/Ruby-Rails/my-gems/openid_client'
+    gem 'openid_client', :git => 'git://github.com/ANUSF/OpenID-Client-Engine.git'
 
 Remark: Instead of mongrel, any server that can handle long URLs is fine.
 
