@@ -10,12 +10,13 @@ Step by step:
 
 2) Add these lines to Gemfile:
 
-    gem 'mongrel', '~> 1.2.0.pre2'
     gem 'devise'
     gem 'devise_openid_authenticatable'
     gem 'openid_client', :git => 'git://github.com/ANUSF/OpenID-Client-Engine.git'
 
-Remark: Instead of mongrel, any server that can handle long URLs is fine.
+    gem 'mongrel', '~> 1.2.0.pre2'
+
+We use mongrel here because WEBrick under MRI cannot handle long URLs.
 
 3) Bundle:
 
@@ -23,7 +24,7 @@ Remark: Instead of mongrel, any server that can handle long URLs is fine.
 
 4) Set up devise:
 
-   rails g devise:install
+    rails g devise:install
 
 5) Run the generator for each user model:
 
