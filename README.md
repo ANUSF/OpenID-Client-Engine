@@ -21,15 +21,19 @@ Remark: Instead of mongrel, any server that can handle long URLs is fine.
 
     bundle
 
-4) Run the generator, specifying the name for the user model:
+4) Set up devise:
+
+   rails g devise:install
+
+5) Run the generator for each user model:
 
     rails g openid_client user
 
-5) Migrate the database:
+6) Migrate the database:
 
     rake db:migrate
 
-6) Make sure there is a `root_path` that devise can redirect to after sign-in.
+7) Make sure there is a `root_path` that devise can redirect to after sign-in.
 
 
 Author: Olaf Delgado-Friedrichs (odf@github.com)

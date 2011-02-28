@@ -41,6 +41,7 @@ class OpenidClientGenerator < Rails::Generators::NamedBase
   end
 
   def create_locale
-    template 'locale.en.yml', 'config/locales/devise.en.yml'
+    template 'locale.en.yml',
+             "config/locales/devise_#{singular_name}_sessions.en.yml"
   end
 end
