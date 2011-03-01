@@ -2,7 +2,7 @@
 
 <%= form_for resource_name, resource,
     :url => session_path(resource_name) do |f| %>
-  <h3>Please enter your ASSDA user name:</h3>
+  <h3>Type your OpenID URL or leave blank to login via the default server</h3>
   <%= f.text_field :identity_url, :id => "login" %>
-  <%= f.submit "Login via ASSDA" %>
+  <%= f.submit "Login via OpenID" %>
 <% end %>
