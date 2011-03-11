@@ -1,18 +1,6 @@
 class OpenidClient::SessionsController < Devise::SessionsController
   helper_method :default_login, :default_logout, :server_human_name
 
-  def default_login
-    OpenidClient::Config.default_login
-  end
-
-  def default_logout
-    OpenidClient::Config.default_logout
-  end
-
-  def server_human_name
-    OpenidClient::Config.server_human_name || default_login
-  end
-
   def create
     login = params[resource_name][:identity_url]
 
@@ -40,7 +28,20 @@ class OpenidClient::SessionsController < Devise::SessionsController
     end
   end
 
-  private
+  protected
+
+  def default_login
+    OpenidClient::Config.default_login
+  end
+
+  def default_logout
+    OpenidClient::Config.default_logout
+  end
+
+  def server_human_name
+    OpenidClient::Config.server_human_name || default_login
+  end
+
   # Whether to bypass OpenID verification.
   def bypass_openid?
     [ 'test', 'cucumber' ].include?(Rails.env)
