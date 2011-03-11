@@ -1,8 +1,12 @@
 class OpenidClient::SessionsController < Devise::SessionsController
   helper_method :default_login, :default_logout, :server_human_name
 
+  def new
+    create if force_default?
+  end
+
   def create
-    login = params[resource_name][:identity_url]
+    login = (params[resource_name] ||= {})[:identity_url]
 
     if bypass_openid?
       resource_class = resource_name.to_s.classify.constantize
@@ -29,6 +33,10 @@ class OpenidClient::SessionsController < Devise::SessionsController
   end
 
   protected
+
+  def force_default?
+    false
+  end
 
   def default_login
     OpenidClient::Config.default_login

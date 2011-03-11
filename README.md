@@ -50,7 +50,14 @@ testing. By default, it disables OpenID only during testing.
 
 2) If no OpenID URL is specified by the user and `default_login`
 returns a non-blank string, that string is used as the URL to
-authenticate at. The default is 'http://myopenid.com'.
+authenticate at. In order for this to be useful, the URL should hold
+an OpenID provider's IDP service (allowing login via OpenID through
+that provider without a consumer-spcified username). The default is
+'http://myopenid.com'.
+
+If moreover `force_default?` returns true, the local sign-in form is
+bypassed completely and the user is sent to the default URL straight
+away.
 
 3) If the parameter `on_server` is passed on sign-out and the method
 `default_logout` returns a non-empty string, that string is used as a
