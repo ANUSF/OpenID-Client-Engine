@@ -6,7 +6,7 @@ Step by step:
 
 1) Create a new rails application:
 
-    rails new oid-test -J -T
+    rails new oid-test
 
 2) Add these lines to Gemfile:
 
@@ -36,7 +36,7 @@ We use mongrel here because WEBrick under MRI cannot handle long URLs.
 
 7) Make sure there is a `root_path` that devise can redirect to after sign-in.
 
-
+----
 Author: Olaf Delgado-Friedrichs (odf@github.com)
 
 Copyright (c) 2011 The Australian National University
