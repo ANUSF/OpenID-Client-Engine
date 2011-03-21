@@ -24,11 +24,14 @@ class OpenidClient::SessionsController < Devise::SessionsController
     set_flash_message :notice, :signed_out if signed_in?(resource_name)
     sign_out(resource_name)
 
-    if bypass_openid? or params[:on_server].blank?
+    if bypass_openid?
       redirect_to root_url
-    elsif default_logout
+    elsif default_logout #TODO this should be parametrised by the user's identity
       back = URI.escape(root_url, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
       redirect_to "#{default_logout}?return_url=#{back}"
+    else
+      redirect_to root_url,
+        :alert => "Remember to log out from your OpenID provider, as well."
     end
   end
 
