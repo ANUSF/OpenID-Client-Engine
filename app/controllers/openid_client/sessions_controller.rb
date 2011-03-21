@@ -29,7 +29,7 @@ class OpenidClient::SessionsController < Devise::SessionsController
 
       if bypass_openid?
         set_flash_message :notice, :signed_out
-      elsif logout
+      elsif not logout.blank?
         set_flash_message :notice, :signed_out
         back = URI.escape(root_url, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
         redirect_to "#{logout}?return_url=#{back}"
