@@ -9,7 +9,7 @@ Installation
 
     rails new oid-test
 
-2) Add these lines to Gemfile:
+2) Add these lines to your Gemfile:
 
     gem 'devise'
     gem 'devise_openid_authenticatable'
@@ -48,23 +48,20 @@ OpenID-specific extras built into the session controllers:
 without any authentication, which can be useful in development and
 testing. By default, it disables OpenID only during testing.
 
-2) If no OpenID URL is specified by the user and `default_login`
+2) If no identity URL is specified by the user and `default_login`
 returns a non-blank string, that string is used as the URL to
-authenticate at. In order for this to be useful, the URL should hold
-an OpenID provider's IDP service (allowing login via OpenID through
-that provider without a consumer-spcified username). The default is
-'http://myopenid.com'.
+authenticate with. It should point to an OpenID provider's IDP service
+(allowing login without a username being passed as part of the
+identity URL). The default is 'http://myopenid.com'.
 
 If moreover `force_default?` returns true, the local sign-in form is
 bypassed completely and the user is sent to the default URL straight
 away.
 
-3) If the parameter `on_server` is passed on sign-out and the method
-`default_logout` returns a non-empty string, that string is used as a
-logout URL to redirect to after signing the user out locally.  This
-will of course have unexpected results if the user is using an
-identity from a different provider, but currently no measures are
-taken to prevent that.
+3) If on logout, `logout_url_for` returns a non-empty string when
+applied to the current identity URL, that string is used as the URL to
+redirect to for server-side logout. Otherwise, the user is simply
+reminded to log out from the OpenID server manually.
 
 
 Customisation
@@ -72,14 +69,13 @@ Customisation
 
 For each user model, the generator creates a controller which inherits
 from `OpenidClient::SessionsController`. That controller can override
-the protected methods `default_login`, `default_logout`,
+the protected methods `default_login`, `logout_url_for`,
 `server_human_name` (a human-readable name for the default OpenID
 provider that is used in the view) and `bypass_openid?` in order to
 change the default behaviour.
 
 The global defaults can changed by setting the attributes
-`default_login`, `default_logout` and `server_human_name` in
-`OpenidClient::Config`.
+`default_login` and `server_human_name` in `OpenidClient::Config`.
 
 Example:
 
