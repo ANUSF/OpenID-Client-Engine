@@ -4,7 +4,7 @@ require "rails"
 module OpenidClient
   class Config
     class << self
-      attr_accessor :default_login, :default_logout, :server_human_name
+      attr_accessor :default_login, :server_human_name
     end
   end
 

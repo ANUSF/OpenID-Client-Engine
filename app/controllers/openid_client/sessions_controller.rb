@@ -21,18 +21,25 @@ class OpenidClient::SessionsController < Devise::SessionsController
   end
 
   def destroy
-    set_flash_message :notice, :signed_out if signed_in?(resource_name)
-    sign_out(resource_name)
+    back_to_root = true
 
-    if bypass_openid?
-      redirect_to root_url
-    elsif default_logout #TODO this should be parametrised by the user's identity
-      back = URI.escape(root_url, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
-      redirect_to "#{default_logout}?return_url=#{back}"
-    else
-      redirect_to root_url,
-        :alert => "Remember to log out from your OpenID provider, as well."
+    if signed_in?(resource_name)
+      logout = logout_url_for self.send("current_#{resource_name}").identity_url
+      sign_out(resource_name)
+
+      if bypass_openid?
+        set_flash_message :notice, :signed_out
+      elsif logout
+        set_flash_message :notice, :signed_out
+        back = URI.escape(root_url, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
+        redirect_to "#{logout}?return_url=#{back}"
+        back_to_root = false
+      else
+        flash[:alert] = "Remember to log out from your OpenID provider, as well."
+      end
     end
+    
+    redirect_to root_url if back_to_root
   end
 
   protected
@@ -45,8 +52,8 @@ class OpenidClient::SessionsController < Devise::SessionsController
     OpenidClient::Config.default_login
   end
 
-  def default_logout
-    OpenidClient::Config.default_logout
+  def logout_url_for(identity)
+    nil
   end
 
   def server_human_name
