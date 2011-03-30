@@ -2,7 +2,7 @@ class OpenidClient::SessionsController < Devise::SessionsController
   helper_method :default_login, :default_logout, :server_human_name
 
   def new
-    create if force_default?
+    create if force_default? and not bypass_openid?
   end
 
   def create
