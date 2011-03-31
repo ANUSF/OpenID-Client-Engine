@@ -1,6 +1,6 @@
 <h1>Sign In</h1>
 
-<%= form_for resource_name, resource,
+<%= form_for resource, :as => resource_name,
     :url => session_path(resource_name) do |f| %>
   <h3>
     Type your OpenID URL
