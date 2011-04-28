@@ -13,18 +13,12 @@ class OpenidClient::SessionsController < Devise::SessionsController
       resource = resource_class.find_or_create_by_identity_url(login)
     else
       params[resource_name][:identity_url] = default_login if login.blank?
-      opts = catch :warden do
-        resource = warden.authenticate!(:scope => resource_name,
-                                        :recall => "#{controller_path}#new")
-      end
+      resource = warden.authenticate(:scope => resource_name,
+                                     :recall => "#{controller_path}#new")
     end
 
-    if resource
-      set_flash_message :notice, :signed_in
-      sign_in_and_redirect(resource_name, resource)
-    elsif opts
-      raise "Error in warden.authenticate!(#{opts.inspect})"
-    end
+    set_flash_message :notice, :signed_in
+    sign_in_and_redirect(resource_name, resource)
   end
 
   def destroy
