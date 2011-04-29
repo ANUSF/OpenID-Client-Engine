@@ -13,8 +13,7 @@ class OpenidClient::SessionsController < Devise::SessionsController
       resource = resource_class.find_or_create_by_identity_url(login)
     else
       params[resource_name][:identity_url] = default_login if login.blank?
-      resource = warden.authenticate!(:scope => resource_name,
-                                      :recall => "#{controller_path}#new")
+      resource = warden.authenticate!(:scope => resource_name, :recall => recall)
     end
 
     set_flash_message :notice, :signed_in
@@ -64,5 +63,10 @@ class OpenidClient::SessionsController < Devise::SessionsController
   # Whether to bypass OpenID verification.
   def bypass_openid?
     [ 'test', 'cucumber' ].include?(Rails.env)
+  end
+
+  def recall
+    action = (force_default? and not bypass_openid?) ? 'destroy' : 'new'
+    "#{controller_path}##{action}"
   end
 end
