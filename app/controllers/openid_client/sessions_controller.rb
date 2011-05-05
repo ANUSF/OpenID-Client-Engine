@@ -2,19 +2,14 @@ class OpenidClient::SessionsController < Devise::SessionsController
   helper_method :default_login, :default_logout, :server_human_name
 
   def new
-    create if force_default? and not bypass_openid?
+    create if force_default?
   end
 
   def create
     login = (params[resource_name] ||= {})[:identity_url]
 
-    if bypass_openid?
-      resource_class = resource_name.to_s.classify.constantize
-      resource = resource_class.find_or_create_by_identity_url(login)
-    else
-      params[resource_name][:identity_url] = default_login if login.blank?
-      resource = warden.authenticate!(:scope => resource_name, :recall => recall)
-    end
+    params[resource_name][:identity_url] = default_login if login.blank?
+    resource = warden.authenticate!(:scope => resource_name, :recall => recall)
 
     set_flash_message :notice, :signed_in
     sign_in_and_redirect(resource_name, resource)
@@ -27,9 +22,7 @@ class OpenidClient::SessionsController < Devise::SessionsController
       logout = logout_url_for self.send("current_#{resource_name}").identity_url
       sign_out(resource_name)
 
-      if bypass_openid?
-        set_flash_message :notice, :signed_out
-      elsif not logout.blank?
+      if not logout.blank?
         set_flash_message :notice, :signed_out
         back = URI.escape(root_url, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
         redirect_to "#{logout}?return_url=#{back}"
@@ -60,13 +53,8 @@ class OpenidClient::SessionsController < Devise::SessionsController
     OpenidClient::Config.server_human_name || default_login
   end
 
-  # Whether to bypass OpenID verification.
-  def bypass_openid?
-    [ 'test', 'cucumber' ].include?(Rails.env)
-  end
-
   def recall
-    action = (force_default? and not bypass_openid?) ? 'destroy' : 'new'
+    action = force_default? ? 'destroy' : 'new'
     "#{controller_path}##{action}"
   end
 end

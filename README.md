@@ -44,11 +44,7 @@ Usage
 Most of the devise documentation should still apply. There are some
 OpenID-specific extras built into the session controllers:
 
-1) If the method `bypass_openid?` returns true, users are signed in
-without any authentication, which can be useful in development and
-testing. By default, it disables OpenID only during testing.
-
-2) If no identity URL is specified by the user and `default_login`
+1) If no identity URL is specified by the user and `default_login`
 returns a non-blank string, that string is used as the URL to
 authenticate with. It should point to an OpenID provider's IDP service
 (allowing login without a username being passed as part of the
@@ -58,7 +54,7 @@ If moreover `force_default?` returns true, the local sign-in form is
 bypassed completely and the user is sent to the default URL straight
 away.
 
-3) If on logout, `logout_url_for` returns a non-empty string when
+2) If on logout, `logout_url_for` returns a non-empty string when
 applied to the current identity URL, that string is used as the URL to
 redirect to for server-side logout. Otherwise, the user is simply
 reminded to log out from the OpenID server manually.
@@ -69,10 +65,10 @@ Customisation
 
 For each user model, the generator creates a controller which inherits
 from `OpenidClient::SessionsController`. That controller can override
-the protected methods `default_login`, `logout_url_for`,
+the protected methods `default_login`, `logout_url_for` and
 `server_human_name` (a human-readable name for the default OpenID
-provider that is used in the view) and `bypass_openid?` in order to
-change the default behaviour.
+provider that is used in the view) in order to change the default
+behaviour.
 
 The global defaults can changed by setting the attributes
 `default_login` and `server_human_name` in `OpenidClient::Config`.
