@@ -32,7 +32,12 @@ class OpenidClient::SessionsController < Devise::SessionsController
       end
     end
     
-    redirect_to root_url if back_to_root
+    if back_to_root
+      if (params[resource_name] || {})[:immediate]
+        session[:openid_checked] = true
+      end
+      redirect_to root_url
+    end
   end
 
   protected
