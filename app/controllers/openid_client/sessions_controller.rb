@@ -8,9 +8,10 @@ class OpenidClient::SessionsController < Devise::SessionsController
   def create
     login = (params[resource_name] ||= {})[:identity_url]
 
-    params[resource_name][:identity_url] = default_login if login.blank?
+    params[resource_name][:identity_url] = normalised_identity_url login
     resource = warden.authenticate!(:scope => resource_name, :recall => recall)
 
+    session[:openid_checked] = true
     set_flash_message :notice, :signed_in
     sign_in_and_redirect(resource_name, resource)
   end
@@ -50,6 +51,10 @@ class OpenidClient::SessionsController < Devise::SessionsController
     OpenidClient::Config.default_login
   end
 
+  def identity_url_for_user(user)
+    "#{default_login}/user/#{user}"
+  end
+
   def logout_url_for(identity)
     nil
   end
@@ -61,5 +66,15 @@ class OpenidClient::SessionsController < Devise::SessionsController
   def recall
     action = force_default? ? 'destroy' : 'new'
     "#{controller_path}##{action}"
+  end
+
+  def normalised_identity_url(url)
+    if url.blank?
+      default_login
+    elsif url =~ /\A[\w\.-_]*\z/
+      identity_url_for_user url
+    else
+      url
+    end
   end
 end
