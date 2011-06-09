@@ -78,6 +78,21 @@ Example:
     OpenidClient::Config.default_login = 'http://myopenid.com'
 
 
+Automatic re-authentication with the server
+-------------------------------------------
+
+An experimental new feature has just been added that allows clients to
+update their authentication status automatically when users log in or
+out of the OpenID server. For this to work, the server must maintain a
+cookie '_openid_session_timestamp' that gets changed after each such
+event. Then the client application will automatically re-authenticate
+with the server whenever the cookie value changes by including the
+following code into the application controller:
+
+    include OpenidClient::Helpers
+    before_filter :update_authentication
+
+
 Licencing
 ---------
 
