@@ -30,7 +30,7 @@ module OpenidClient
     def openid_current?(state)
       if not session[:openid_checked].blank?
         state['checking'] = nil
-        timestamp = cookies[:_openid_session_timestamp]
+        timestamp = cookies[OpenidClient::Config.server_timestamp_key]
         if timestamp.blank? or timestamp == state['server_timestamp']
           true
         else
@@ -43,16 +43,12 @@ module OpenidClient
       end
     end
 
-    def oid_state_key 
-      @oid_state_key ||= "_#{Rails.root.sub(/^.*\//, '')}_oid_state"
-    end
-
     def load_oid_state
-      JSON::load(cookies[oid_state_key] || '{}')
+      JSON::load(cookies.signed[OpenidClient::Config.client_state_key] || '{}')
     end
 
     def save_oid_state(state)
-      cookies[oid_state_key] = state.to_json
+      cookies.signed[OpenidClient::Config.client_state_key] = state.to_json
     end
   end
 end
