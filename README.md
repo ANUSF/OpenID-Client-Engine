@@ -54,7 +54,14 @@ If moreover `force_default?` returns true, the local sign-in form is
 bypassed completely and the user is sent to the default URL straight
 away.
 
-2) If on logout, `logout_url_for` returns a non-empty string when
+2) The method `identity_url_for_user` constructs a server-specific URL
+from a user name. By default, if the server (default login) is
+`http://guide.galaxy.net` and the user name is `arthur.dent`, the
+identity URL constructed is
+`http://guide.galaxy.net/user/arthur.dent`. By overriding the method,
+other conventions can be implemented.
+
+3) If on logout, `logout_url_for` returns a non-empty string when
 applied to the current identity URL, that string is used as the URL to
 redirect to for server-side logout. Otherwise, the user is simply
 reminded to log out from the OpenID server manually.
