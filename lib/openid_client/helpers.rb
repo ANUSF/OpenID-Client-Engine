@@ -7,9 +7,7 @@ module OpenidClient
     # user is already authenticated against a single-sign-on server
     # otherwise. This would typically be used as a before filter.
     def update_authentication
-      key = OpenidClient::Config.server_timestamp_key
-      timestamp = cookies[key]
-      cookies[key] = timestamp = 'x' if timestamp.blank?
+      timestamp = get_timestamp
       Rails.logger.error "@@@ server timestamp = #{timestamp}"
 
       state = load_oid_state
@@ -36,6 +34,11 @@ module OpenidClient
 
     def save_oid_state(state)
       cookies.signed[OpenidClient::Config.client_state_key] = state.to_json
+    end
+
+    def get_timestamp
+      t = cookies[OpenidClient::Config.server_timestamp_key]
+      if t.blank? then 'x' else t end
     end
   end
 end
