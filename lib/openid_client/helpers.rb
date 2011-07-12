@@ -8,23 +8,25 @@ module OpenidClient
     # otherwise. This would typically be used as a before filter.
     def update_authentication
       timestamp = get_timestamp
-      Rails.logger.error "@@@ server timestamp = #{timestamp}"
+      Rails.logger.info "OID check: server timestamp = #{timestamp}"
 
       state = load_oid_state
-      Rails.logger.error "@@@ initial state = #{state.inspect}"
+      Rails.logger.info "OID check: initial state = #{state.inspect}"
 
       if not session[:openid_checked].blank?
+        Rails.logger.info "OID check: finished (redirecting to requested page)"
         save_oid_state 'request_url' => nil, 'finished' => timestamp
         session[:openid_checked] = nil
         target = state['request_url']
       elsif state['finished'] != timestamp and
           not request.path =~ /^#{new_user_session_path}\??/
+        Rails.logger.info "OID check: changes on server, re-authenticating"
         save_oid_state 'request_url' => request.url, 'finished' => nil
         reset_session
         target = new_user_session_path(:user => { :immediate => true })
       end
 
-      Rails.logger.error "@@@ final state = #{load_oid_state.inspect}"
+      Rails.logger.info "OID check: final state = #{load_oid_state.inspect}"
       redirect_to target unless target.blank?
     end
 
