@@ -35,7 +35,10 @@ module OpenidClient
     end
 
     def save_oid_state(state)
-      cookies.signed[OpenidClient::Config.client_state_key] = state.to_json
+      cookies.signed[OpenidClient::Config.client_state_key] = {
+        :value => state.to_json,
+        :expires => 15.minutes.from_now
+      }
     end
 
     def get_timestamp
