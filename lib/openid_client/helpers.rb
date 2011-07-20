@@ -33,8 +33,8 @@ module OpenidClient
             info "request did not pass csrf validation"
           else
             info "updating authenticity token"
-            target = target.merge({ request_forgery_protection_token =>
-                                    form_authenticity_token })
+            target[request_forgery_protection_token.to_s] =
+              form_authenticity_token
             #request.headers['X-CSRF-Token'] = form_authenticity_token
           end
         end
