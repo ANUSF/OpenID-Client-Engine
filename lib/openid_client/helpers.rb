@@ -1,5 +1,6 @@
 module OpenidClient
   module Helpers
+    USER_KEY = 'warden.user.user.key'
 
     protected
 
@@ -8,48 +9,40 @@ module OpenidClient
     # otherwise. This would typically be used as a before filter.
     def update_authentication
       timestamp = get_timestamp
-      info "server timestamp = #{timestamp}"
-
       state = load_oid_state
-      info "initial state = #{state.inspect}"
-      info "csrf token = #{form_authenticity_token}"
+
+      info "server timestamp = #{timestamp}"
+      info "client timestamp = #{state['timestamp']}"
 
       if not session[:openid_checked].blank?
         info "finished re-authentication"
-        save_oid_state 'finished' => timestamp
+        save_oid_state 'timestamp' => timestamp
         session[:openid_checked] = nil
 
+        if session[USER_KEY] == (state['session'] || {})[USER_KEY]
+          info "Restoring previous session"
+          state['session'].each { |k,v| session[k] = v }
+        end
+
         target = state['request_target']
-        if target.nil?
+        if target.blank?
           info "no redirection required"
         elsif target['_method'].nil?
           info "redirecting to requested page"
         else
           info "resubmitting request"
-          if state['user_key'] != session['warden.user.user.key']
-            info "user key has changed from #{state['user_key']} " +
-              "to #{session['warden.user.user.key']}"
-          elsif not state['verified']
-            info "request did not pass csrf validation"
-          else
-            info "updating authenticity token"
-            target[request_forgery_protection_token.to_s] =
-              form_authenticity_token
-            #request.headers['X-CSRF-Token'] = form_authenticity_token
-          end
         end
       elsif recheck_needed(timestamp, state)
         info "starting re-authentication"
         save_oid_state('request_target' => target_hash,
-                       'user_key' => session['warden.user.user.key'],
-                       'verified' => verified_request?,
-                       'finished' => nil)
+                       'session' => session,
+                       'timestamp' => nil)
         reset_session
         target = new_user_session_path :user => { :immediate => true }
+      else
+        info "proceeding normally"
       end
 
-      info "final state = #{load_oid_state.inspect}"
-      info "target = #{target.inspect}"
       redirect_to target unless target.blank?
     end
 
@@ -77,7 +70,7 @@ module OpenidClient
     end
 
     def recheck_needed(timestamp, state)
-      state['finished'] != timestamp and 
+      state['timestamp'] != timestamp and 
         not request.path =~ /^#{new_user_session_path}\??/
     end
 
