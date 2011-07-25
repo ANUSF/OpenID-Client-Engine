@@ -27,7 +27,7 @@ We use mongrel here because WEBrick under MRI cannot handle long URLs.
 
     rails g devise:install
 
-5) Run the generator for each user model you would like to add:
+5) Run the generator for each user model:
 
     rails g openid_client user
 
@@ -77,18 +77,14 @@ the protected methods `default_login`, `logout_url_for` and
 provider that is used in the view) in order to change the default
 behaviour.
 
-The global defaults can changed by setting the attributes
+The global defaults can be changed by setting the attributes
 `default_login` and `server_human_name` in `OpenidClient::Config`.
-
-Example:
-
-    OpenidClient::Config.default_login = 'http://myopenid.com'
 
 
 Automatic re-authentication with the server
 -------------------------------------------
 
-An experimental new feature has just been added that allows clients to
+An experimental new feature has been added that allows clients to
 update their authentication status automatically when users log in or
 out of the OpenID server. For this to work, the server must maintain a
 cookie '_openid_session_timestamp' that gets changed after each such
@@ -98,6 +94,36 @@ following code into the application controller:
 
     include OpenidClient::Helpers
     before_filter :update_authentication
+
+In order to prevent problems due to stale cookies, re-authentication
+is automatically initiated after a configurable amount of time
+(default 15 minutes) even when the server timestamp has not changed.
+
+CAVEAT: at the moment, multiple user models or models named anything
+other than 'user' are not supported with this feature.
+
+
+Configuration Example
+---------------------
+
+The code below configures the engine with the default values:
+
+  OpenidClient::Config.configure do |c|
+    # Default identity URL.
+    c.default_login         = 'http://myopenid.com'
+
+    # Displayed text for default OpenID server.
+    c.server_human_name     = nil
+
+    # Cookie name used by server to hold timestamp.
+    c.server_timestamp_key  = :_openid_session_timestamp
+
+    # Cookie name to store internal state in.
+    c.client_state_key      = :_openid_client_state
+
+    # Time after which re-authentication is forced.
+    c.re_authenticate_after = 15.minutes
+  end
 
 
 Licencing
