@@ -28,7 +28,8 @@ module OpenidClient
   class Config
     class << self
       attr_accessor :default_login, :server_human_name,
-                    :server_timestamp_key, :client_state_key
+                    :server_timestamp_key, :client_state_key,
+                    :re_authenticate_after
 
       def configure
         yield self if block_given?
@@ -37,9 +38,10 @@ module OpenidClient
   end
 
   OpenidClient::Config.configure do |c|
-    c.default_login        = 'http://myopenid.com'
-    c.server_timestamp_key = :_openid_session_timestamp
-    c.client_state_key     = :_openid_client_state
+    c.default_login         = 'http://myopenid.com'
+    c.server_timestamp_key  = :_openid_session_timestamp
+    c.client_state_key      = :_openid_client_state
+    c.re_authenticate_after = 15.minutes
   end
 
   class Engine < Rails::Engine

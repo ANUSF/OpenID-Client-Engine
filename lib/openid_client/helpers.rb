@@ -59,8 +59,7 @@ module OpenidClient
     def save_oid_state(state)
       cookies.signed[OpenidClient::Config.client_state_key] = {
         :value => state.to_json,
-        :expires => 15.seconds.from_now
-        #:expires => 15.minutes.from_now
+        :expires => OpenidClient::Config.re_authenticate_after.from_now
       }
     end
 
