@@ -21,7 +21,8 @@ module OpenidClient
 
         if session[USER_KEY] == (state['session'] || {})[USER_KEY]
           info "Restoring previous session"
-          state['session'].each { |k,v| session[k] = v }
+          state['session'].each { |k,v| session[k] = v unless k == "flash" }
+          (state['session']['flash'] || []).each { |x| flash[x[0]] = x[1] }
         end
 
         target = state['request_target']
@@ -70,7 +71,8 @@ module OpenidClient
 
     def recheck_needed(timestamp, state)
       state['timestamp'] != timestamp and 
-        not request.path =~ /^#{new_user_session_path}\??/
+        (params[:controller] != 'sessions' or
+         not ['new', 'create', 'destroy'].include? params[:action])
     end
 
     def target_hash
