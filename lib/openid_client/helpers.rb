@@ -19,10 +19,11 @@ module OpenidClient
         save_oid_state 'timestamp' => timestamp
         session[:openid_checked] = nil
 
-        if session[USER_KEY] == (state['session'] || {})[USER_KEY]
+        old_session = state['session'] || {}
+        if session[USER_KEY] == old_session[USER_KEY]
           info "Restoring previous session"
-          state['session'].each { |k,v| session[k] = v unless k == "flash" }
-          (state['session']['flash'] || []).each { |x| flash[x[0]] = x[1] }
+          old_session.each { |k,v| session[k] = v unless k == "flash" }
+          (old_session['flash'] || []).each { |x| flash[x[0]] = x[1] }
         end
 
         target = state['request_target']
@@ -71,7 +72,7 @@ module OpenidClient
 
     def recheck_needed(timestamp, state)
       state['timestamp'] != timestamp and 
-        (params[:controller] != 'sessions' or
+        (params[:controller] != OpenidClient::Config.session_controller_name or
          not ['new', 'create', 'destroy'].include? params[:action])
     end
 
