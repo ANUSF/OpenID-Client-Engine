@@ -30,7 +30,7 @@ module OpenidClient
         if target.blank?
           info "no redirection required"
         elsif target['_method'].nil?
-          info "redirecting to requested page"
+          info "redirecting to requested page #{target}"
         else
           info "resubmitting request"
         end
@@ -77,10 +77,19 @@ module OpenidClient
     end
 
     def target_hash
-      if request.request_method != 'GET'
-        params.merge({ :_method => request.request_method })
+      t = if request.request_method != 'GET'
+            request.parameters.merge({ :_method => request.request_method })
+          else
+            request.parameters.merge({})
+          end
+      t.delete :action
+      t.delete :controller
+      url = url_for request.path_parameters
+      full_url = url_for request.parameters
+      if full_url == url
+        url
       else
-        params
+        "#{url}?#{t.to_params}"
       end
     end
   end
