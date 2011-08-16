@@ -66,14 +66,14 @@ module OpenidClient
     end
 
     def get_timestamp
-      t = cookies[OpenidClient::Config.server_timestamp_key]
-      if t.blank? then 'x' else t end
+      cookies[OpenidClient::Config.server_timestamp_key]
     end
 
     def recheck_needed(timestamp, state)
-      state['timestamp'] != timestamp and 
-        (params[:controller] != OpenidClient::Config.session_controller_name or
-         not ['new', 'create', 'destroy'].include? params[:action])
+      state['timestamp'] != timestamp and
+        not (timestamp.blank? and session[USER_KEY].blank?) and
+        ( params[:controller] != OpenidClient::Config.session_controller_name or
+          not ['new', 'create', 'destroy'].include? params[:action] )
     end
 
     def target_hash
