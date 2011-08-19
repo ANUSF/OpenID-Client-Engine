@@ -19,11 +19,10 @@ module OpenidClient
         save_oid_state 'timestamp' => timestamp
         session[:openid_checked] = nil
 
-        old_session = state['session'] || {}
+        old_session = decoded(state['session'] || {})
         if session[USER_KEY] == old_session[USER_KEY]
           info "Restoring previous session"
-          old_session.each { |k,v| session[k] = v unless k == "flash" }
-          (old_session['flash'] || []).each { |x| flash[x[0]] = x[1] }
+          old_session.each { |k, v| session[k] = v }
         end
 
         target = state['request_target']
@@ -37,7 +36,7 @@ module OpenidClient
       elsif recheck_needed(timestamp, state)
         info "starting re-authentication"
         save_oid_state('request_target' => target_hash,
-                       'session' => session,
+                       'session' => encoded(session),
                        'timestamp' => nil)
         reset_session
         target = new_user_session_path :user => { :immediate => true }
@@ -63,6 +62,18 @@ module OpenidClient
         :value => state.to_json,
         :expires => OpenidClient::Config.re_authenticate_after.from_now
       }
+    end
+
+    def encoded(source)
+      result = {}
+      source.each { |k, v| result[k] = Marshal.dump(v) }
+      result
+    end
+
+    def decoded(source)
+      result = {}
+      source.each { |k, v| result[k] = Marshal.load(v) }
+      result
     end
 
     def get_timestamp
