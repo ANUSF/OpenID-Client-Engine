@@ -93,7 +93,7 @@ with the server whenever the cookie value changes by including the
 following code into the application controller:
 
     include OpenidClient::Helpers
-    before_filter :update_authentication
+    before_filter :oid_update_authentication
 
 In order to prevent problems due to stale cookies, re-authentication
 is automatically initiated after a configurable amount of time
@@ -101,6 +101,15 @@ is automatically initiated after a configurable amount of time
 
 CAVEAT: at the moment, multiple user models or models named anything
 other than 'user' are not supported with this feature.
+
+The `OpenidClient::Helpers` module also provides a method
+`oid_authentication_state` which does not perform any redirections but simply
+returns a hash. Most of the entries are used internally by
+`oid_update_authentication`, but the following can be useful within
+controllers:
+
+    :is_current # true if client session is still considered up-to-date
+    :logged_in  # true if someone is currently logged in on the client
 
 
 Configuration Example

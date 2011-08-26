@@ -4,28 +4,62 @@ module OpenidClient
 
     protected
 
+    def oid_authentication_state
+      unless defined? @oid_authentication_state
+        state            = oid_load_state
+
+        server_timestamp = oid_get_timestamp
+        client_timestamp = state['timestamp']
+        logged_in        = session[USER_KEY].present?
+
+        up_to_date = server_timestamp == client_timestamp
+        irrelevant = !logged_in && server_timestamp == 'x'
+        recursive  =
+          params[:controller] == OpenidClient::Config.session_controller_name &&
+          ['new', 'create', 'destroy'].include?(params[:action])
+        is_current = up_to_date || irrelevant || recursive
+
+        openid_checked   = session[:openid_checked].present?
+        saved_target     = state['request_target']
+        saved_session    = oid_decoded(state['session'] || {})
+        same_user        = session[USER_KEY] == saved_session[USER_KEY]
+        
+        @oid_authentication_state = {
+          :server_timestamp => server_timestamp,
+          :client_timestamp => client_timestamp,
+          :logged_in        => logged_in,
+          :is_current       => is_current,
+
+          :openid_checked   => openid_checked,
+          :same_user        => same_user,
+          :saved_target     => saved_target,
+          :saved_session    => saved_session
+        }
+      end
+      @oid_authentication_state
+    end
+
     # Redirects to a requested page after authentication; checks whether
     # user is already authenticated against a single-sign-on server
     # otherwise. This would typically be used as a before filter.
-    def update_authentication
-      timestamp = oid_get_timestamp
-      state = oid_load_state
+    def oid_update_authentication
+      state = oid_authentication_state
 
-      oid_info "server timestamp = #{timestamp}"
-      oid_info "client timestamp = #{state['timestamp']}"
+      oid_info "server timestamp = #{state[:server_timestamp]}"
+      oid_info "client timestamp = #{state[:client_timestamp]}"
 
-      if not session[:openid_checked].blank?
-        oid_info "finished re-authentication"
-        oid_save_state 'timestamp' => timestamp
+      if state[:openid_checked]
+        oid_info "finished (re-)authentication"
+        oid_save_state 'timestamp' => state[:server_timestamp]
         session[:openid_checked] = nil
 
-        old_session = oid_decoded(state['session'] || {})
-        if session[USER_KEY] == old_session[USER_KEY]
+        if state[:same_user] and state[:saved_session].present?
+          reset_session
           oid_info "Restoring previous session"
-          old_session.each { |k, v| session[k] = v }
+          state[:saved_session].each { |k, v| session[k] = v }
         end
 
-        target = state['request_target']
+        target = state[:saved_target]
         if target.blank?
           oid_info "no redirection required"
         elsif target['_method'].nil?
@@ -33,11 +67,11 @@ module OpenidClient
         else
           oid_info "resubmitting request"
         end
-      elsif oid_recheck_needed?(timestamp, state)
+      elsif not state[:is_current]
         oid_info "starting re-authentication"
         oid_save_state('request_target' => oid_target_hash,
-                       'session' => oid_encoded(session),
-                       'timestamp' => nil)
+                       'session'        => oid_encoded(session),
+                       'timestamp'      => nil)
         reset_session
         target = new_user_session_path :user => { :immediate => true }
       else
@@ -79,16 +113,6 @@ module OpenidClient
     def oid_get_timestamp
       t = cookies[OpenidClient::Config.server_timestamp_key]
       if t.blank? then 'x' else t end
-    end
-
-    def oid_recheck_needed?(timestamp, state)
-      due       = state['timestamp'] != timestamp
-      relevant  = (timestamp != 'x' or not session[USER_KEY].blank?)
-      recursive = (
-        params[:controller] == OpenidClient::Config.session_controller_name and
-        ['new', 'create', 'destroy'].include? params[:action])
-
-      due and relevant and not recursive
     end
 
     def oid_target_hash
