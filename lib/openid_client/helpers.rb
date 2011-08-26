@@ -8,40 +8,40 @@ module OpenidClient
     # user is already authenticated against a single-sign-on server
     # otherwise. This would typically be used as a before filter.
     def update_authentication
-      timestamp = get_timestamp
-      state = load_oid_state
+      timestamp = oid_get_timestamp
+      state = oid_load_state
 
-      info "server timestamp = #{timestamp}"
-      info "client timestamp = #{state['timestamp']}"
+      oid_info "server timestamp = #{timestamp}"
+      oid_info "client timestamp = #{state['timestamp']}"
 
       if not session[:openid_checked].blank?
-        info "finished re-authentication"
-        save_oid_state 'timestamp' => timestamp
+        oid_info "finished re-authentication"
+        oid_save_state 'timestamp' => timestamp
         session[:openid_checked] = nil
 
-        old_session = decoded(state['session'] || {})
+        old_session = oid_decoded(state['session'] || {})
         if session[USER_KEY] == old_session[USER_KEY]
-          info "Restoring previous session"
+          oid_info "Restoring previous session"
           old_session.each { |k, v| session[k] = v }
         end
 
         target = state['request_target']
         if target.blank?
-          info "no redirection required"
+          oid_info "no redirection required"
         elsif target['_method'].nil?
-          info "redirecting to requested page #{target}"
+          oid_info "redirecting to requested page #{target}"
         else
-          info "resubmitting request"
+          oid_info "resubmitting request"
         end
-      elsif recheck_needed(timestamp, state)
-        info "starting re-authentication"
-        save_oid_state('request_target' => target_hash,
-                       'session' => encoded(session),
+      elsif oid_recheck_needed?(timestamp, state)
+        oid_info "starting re-authentication"
+        oid_save_state('request_target' => oid_target_hash,
+                       'session' => oid_encoded(session),
                        'timestamp' => nil)
         reset_session
         target = new_user_session_path :user => { :immediate => true }
       else
-        info "proceeding normally"
+        oid_info "proceeding normally"
       end
 
       redirect_to target unless target.blank?
@@ -49,39 +49,39 @@ module OpenidClient
 
     private
 
-    def info(s)
+    def oid_info(s)
       Rails.logger.info "OID check: #{s}"
     end
 
-    def load_oid_state
+    def oid_load_state
       JSON::load(cookies.signed[OpenidClient::Config.client_state_key] || '{}')
     end
 
-    def save_oid_state(state)
+    def oid_save_state(state)
       cookies.signed[OpenidClient::Config.client_state_key] = {
         :value => state.to_json,
         :expires => OpenidClient::Config.re_authenticate_after.from_now
       }
     end
 
-    def encoded(source)
+    def oid_encoded(source)
       result = {}
       source.each { |k, v| result[k] = Marshal.dump(v) }
       result
     end
 
-    def decoded(source)
+    def oid_decoded(source)
       result = {}
       source.each { |k, v| result[k] = Marshal.load(v) }
       result
     end
 
-    def get_timestamp
+    def oid_get_timestamp
       t = cookies[OpenidClient::Config.server_timestamp_key]
       if t.blank? then 'x' else t end
     end
 
-    def recheck_needed(timestamp, state)
+    def oid_recheck_needed?(timestamp, state)
       due       = state['timestamp'] != timestamp
       relevant  = (timestamp != 'x' or not session[USER_KEY].blank?)
       recursive = (
@@ -91,7 +91,7 @@ module OpenidClient
       due and relevant and not recursive
     end
 
-    def target_hash
+    def oid_target_hash
       t = if request.request_method != 'GET'
             request.parameters.merge({ :_method => request.request_method })
           else
