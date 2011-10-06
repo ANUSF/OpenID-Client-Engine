@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'openid_client'
-  s.version     = '0.2.0'
+  s.version     = '0.2.1'
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Olaf Delgado-Friedrichs', 'ANUSF']
   s.email       = ['olaf.delgado-friedrichs@anu.edu.au']

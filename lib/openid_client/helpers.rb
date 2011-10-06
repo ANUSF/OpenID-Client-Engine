@@ -128,7 +128,7 @@ module OpenidClient
       if full_url == url
         url
       else
-        "#{url}?#{t.to_params}"
+        "#{url}?#{t.to_param}"
       end
     end
   end
