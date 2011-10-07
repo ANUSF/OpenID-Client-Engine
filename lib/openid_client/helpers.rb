@@ -92,8 +92,14 @@ module OpenidClient
     end
 
     def oid_save_state(state)
+      state_encoded = state.to_json
+      unless Rails.env.production?
+        oid_info "encoded state size = #{state_encoded.size}"
+        oid_info "state contents: #{state.inspect}"
+      end
+
       cookies.signed[OpenidClient::Config.client_state_key] = {
-        :value => state.to_json,
+        :value => state_encoded,
         :expires => OpenidClient::Config.re_authenticate_after.from_now
       }
     end
